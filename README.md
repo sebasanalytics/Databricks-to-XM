@@ -108,34 +108,28 @@ Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura 
 - **Entregable:** `silver_energia.demanda_diaria` y `silver_energia.dim_ciiu`. Hito 3 cerrado.
 
 ### Clase 7 — Sumar fuentes y construir features (Gold)
-- **Teoría:** features para series temporales (lags, ventanas, calendario, estacionalidad); Feature Store en Unity Catalog (feature tables, lookups, point-in-time); Lakehouse Federation para consultar fuentes sin moverlas; cómo entra una fuente nueva sin romper el pipeline.
-- **Práctica:** incorporar calendario de festivos colombianos y un histórico más largo; construir `gold_energia.features_demanda_diaria`; ADR-002 "modelo global vs. un modelo por serie".
+- **Teoría:** qué es oro y qué es una feature; calendario y festivos como fuente; lags y ventanas con funciones de ventana; fuga de información y horizonte; series incompletas y ceros; Feature Engineering en Unity Catalog (llave primaria, lookups, point-in-time); Lakehouse Federation para consultar fuentes sin moverlas.
+- **Práctica:** incorporar `data/reference/festivos_co.csv`; implementar `agregar_calendario` y `agregar_lags` en `src/xm_demanda/features/build.py`; construir `features_demanda_diaria` con MERGE idempotente y llave primaria; ADR-003 (opcional) "features sobre la versión vigente vs. point-in-time".
 - **Sector:** variables que mueven la demanda en Colombia: festivos, hidrología y fenómeno de El Niño, temperatura, autogeneración; proyecciones de demanda de la UPME como referencia de largo plazo.
 - **Entregable:** tabla de features en Gold con documentación de cada variable. Hito 4 abierto.
 
 ### Clase 8 — Código, configuración y datos separados
-- **Teoría:** Git folders y repositorios; estrategia de ramas y PR; notebooks delgados + paquete Python; tests unitarios e integración; ruff y pre-commit; configuración por ambiente sin secretos; uso de Databricks Assistant y asistentes de código con verificación.
-- **Práctica:** mover lógica a `src/xm_demanda/`; escribir tests con pytest; abrir el primer PR y dejar que CI lo revise; un PR que rompe un test.
-- **Sector:** reproducibilidad como requisito ante auditoría regulatoria: poder reconstruir hoy el pronóstico que se publicó hace seis meses.
-- **Entregable:** paquete `xm_demanda` con tests pasando en CI. Hito 4 cerrado.
+- **Teoría:** por qué código, configuración y datos cambian a ritmos distintos; notebooks delgados + paquete `xm_demanda`; el camino de un cambio (rama → PR → CI → merge → tag → despliegue); la pirámide de pruebas del proyecto (ruff, unitarias puras, integración con Spark, `verificar()` sobre datos reales); configuración por ambiente sin secretos (secret scopes); asistentes de código con verificación; reproducibilidad: las cuatro versiones de un pronóstico.
+- **Práctica:** `validar_config`; el contrato de oro como código (`columnas_contrato`); correr ruff y pytest desde Databricks; un test de integración que distingue la ventana correcta de la que tiene fuga; CI con job de integración (Spark local); el PR que debe fallar.
+- **Sector:** reproducibilidad como requisito ante auditoría regulatoria: poder reconstruir hoy el pronóstico que se publicó hace seis meses (código, configuración, versión Delta, modelo).
+- **Entregable:** paquete `xm_demanda` con tests unitarios y de integración pasando en CI; evidencia de un PR detenido por CI. Hito 4 cerrado.
 
-### Clase 9 — Experimentación con MLflow
-- **Teoría:** MLflow 3 en Databricks: experimentos, runs, artefactos, `log_input`, evaluación y comparación; baselines honestos; validación temporal; errores típicos (leakage, métricas globales que esconden segmentos).
-- **Práctica:** baseline estacional-naive; modelo global LightGBM con lags y categóricas; comparación de runs; métricas por segmento; probar la temperatura y descartarla con evidencia.
-- **Sector:** cómo pronostican demanda XM (pronóstico publicado), los operadores europeos (ENTSO-E day-ahead) y AEMO; por qué el baseline estacional es difícil de vencer en demanda eléctrica.
-- **Entregable:** experimento `demanda_7d` con runs comparables y modelo candidato. Hito 5 abierto.
+### Clases 9 y 10 — MLOps en acción: experimentar, medir y registrar (sesión doble, 2 h 30 min)
+- **Teoría:** qué es MLOps y su ciclo (datos → experimentar → evaluar → registrar → desplegar → monitorear → reentrenar); qué medir y para qué (calidad, honestidad, datos, operación, negocio); qué ofrece Databricks en cada paso (MLflow Tracking, evaluación, Model Registry en Unity Catalog, Serving, Monitoring, AutoML); anatomía de un run; baselines honestos; validación temporal y walk-forward; fuga de información vista en el tracking; versiones, alias, firma y linaje; "deploy code, not models".
+- **Práctica:** experimento `demanda_7d` con modelos de varios tipos y el mismo tracking: naive estacional, regla de festivo, LightGBM global sin escala, walk-forward con runs anidados, un run con fuga marcado, un clasificador ("¿cae más de 10 %?") y un clustering de perfiles semanales; métricas por segmento; registro de dos candidatos en Unity Catalog con `@champion` / `@challenger`; inferencia cargando `@champion`.
+- **Sector:** cómo pronostican demanda XM, ENTSO-E y AEMO; por qué el baseline estacional es difícil de vencer en demanda eléctrica; trazabilidad de qué modelo produjo qué pronóstico con qué datos.
+- **Entregable:** experimento con 7 runs comparables y modelo registrado con alias y firma. Hito 5 abierto.
 
-### Clase 10 — Registro, versiones y entrenamiento reproducible
-- **Teoría:** Model Registry en Unity Catalog; versiones y alias (`champion`/`challenger`); firma y ejemplo de entrada; linaje modelo↔datos↔código; el patrón "deploy code, not models" y cuándo sí promover artefactos.
-- **Práctica:** `train.py` parametrizado por configuración; registro del modelo en `dev.models.demanda_7d`; promoción por alias; detectar un modelo entrenado desde `dev` con datos de `prod`.
-- **Sector:** trazabilidad de qué modelo produjo qué pronóstico y con qué datos, condición para publicar cifras que usan terceros.
-- **Entregable:** modelo registrado y versionado con firma.
-
-### Clase 11 — Inferencia batch, Serving y Apps
-- **Teoría:** batch vs. tiempo real vs. app: criterios de decisión; Model Serving (CPU/GPU, escalado, monitoreo de endpoint); AI Gateway; Databricks Apps; Genie y AI/BI Dashboards; lo que Free Edition permite (Serving CPU, 3 apps con caducidad de 24 h).
-- **Práctica:** job de inferencia batch a `gold_energia.pronostico_demanda`; endpoint del modelo campeón; app Streamlit "observado vs. estimado" por segmento.
-- **Sector:** Octopus Energy y los pronósticos como servicio interno; qué consumidores hay en XM para un pronóstico (planeación, seguimiento, mercado) y qué canal necesita cada uno.
-- **Entregable:** tabla de pronósticos, endpoint y app funcionando. Hito 5 cerrado.
+### Clase 11 — Del modelo registrado a quien lo usa: inferencia batch, Serving y Apps
+- **Teoría:** cuatro canales para un pronóstico (batch, tiempo real, app, AI/BI) y tres preguntas para escoger (frescura de los datos, quién trae las features, persona o sistema); inferencia batch auditable (alias resuelto una vez, versión de los datos, validación antes de publicar); `MERGE` idempotente y challenger en sombra; Model Serving (served entity, scale to zero, traffic split, AI Gateway y tablas de inferencia); Databricks Apps como principal de Unity Catalog (autorización de app y de usuario); dashboards AI/BI y Genie; lo que Free Edition permite (CPU, pocos endpoints, 3 apps de 24 h).
+- **Práctica:** `pronostico_demanda` con linaje (modelo, versión, versión de los datos) para `@champion` y `@challenger`; `MERGE` corrido dos veces sin duplicar; vista `v_observado_vs_estimado` cuyo WAPE coincide con el run de la clase 9; consulta del endpoint compartido `xm-demanda-7d`; `GRANT` mínimos para que la app compartida lea la vista; datasets de un dashboard AI/BI y demo de Genie.
+- **Sector:** el pronóstico como servicio interno (AEMO, Octopus Energy en la plataforma de energía de Databricks); qué consumidores tiene en XM (planeación, seguimiento, gerencia, simulación) y qué canal necesita cada uno.
+- **Entregable:** tabla de pronósticos, vista observado vs. estimado, endpoint consultado y app leyendo la vista. Hito 5 cerrado.
 
 ### Clase 12 — Orquestación con Lakeflow Jobs
 - **Teoría:** jobs multi-tarea, dependencias, parámetros, reintentos, timeouts, notificaciones; triggers por calendario y por llegada de archivo; concurrencia; cuándo integrar Azure Data Factory o Airflow y cuándo no.
