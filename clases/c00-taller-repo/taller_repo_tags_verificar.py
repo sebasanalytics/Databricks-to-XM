@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Taller corto — Cómo usamos el repositorio: ramas, tags y `verificar()`
 # MAGIC
-# MAGIC 
+# MAGIC
 # MAGIC
 # MAGIC Tres cosas al salir de aquí:
 # MAGIC 1. Saber qué hay en `main`, qué hay en `solution` y qué es un tag `sNN`.

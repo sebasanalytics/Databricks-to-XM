@@ -10,11 +10,11 @@ Llena una fila por tabla. Reemplaza cada `<…>`. El dueño es un rol de XM, no 
 
 | Capa | Tabla | Grano (qué es una fila) | Dueño | Frescura | Garantías |
 |---|---|---|---|---|---|
-| Bronce | `bronze_energia.demanda_raw` | <un registro publicado, tal como llegó> | <rol> | <cuándo se actualiza> | <qué promete> |
-| Plata | `silver_energia.demanda_diaria` | <…> | <rol> | <…> | <…> |
-| Plata | `silver_energia.dim_ciiu` | <…> | <rol> | <…> | <…> |
-| Oro | `gold_energia.features_demanda_diaria` | <…> | <rol> | <…> | <…> |
-| Oro | `gold_energia.pronostico_demanda` | <…> | <rol> | <…> | <…> |
+| Bronce | `bronze_energia.demanda_raw` | Un registro publicado, tal como llegó | DataLake XM | Diario | Datos crudos del día N-5 |
+| Plata | `silver_energia.demanda_diaria` | Demanda y pérdidas de forma diaris por OR, MC, Mercado y CIIU | Analítica | Diario | Datos validados y listo para modelar |
+| Plata | `silver_energia.dim_ciiu` | Código alfa numérico que indica actividad económica  | Gobierno | Diario | Tener los atributos del código CIIU |
+| Oro | `gold_energia.features_demanda_diaria` | Representación del dato utilizando ténicas de analítica | Analítica, Negocio | Diario | Variables/Features del modelo |
+| Oro | `gold_energia.pronostico_demanda` | Dato esperado a futuro | Analítica, Usuario | Diario | Valor futuro de la variable pronosticada |
 
 ## Llave de serie
 

@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "5"
+# ///
 # MAGIC %md
 # MAGIC # Lab 4 — Bronce con Auto Loader: 23 publicaciones y una republicación
 # MAGIC
@@ -11,7 +15,7 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("usuario", "")
+dbutils.widgets.text("usuario", "sebastianruiz")
 usuario = dbutils.widgets.get("usuario").strip().lower()
 assert usuario, "Escribe tu usuario (el sufijo de tu esquema c01_<usuario>)."
 

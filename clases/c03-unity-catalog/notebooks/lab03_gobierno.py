@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # MAGIC %md
 # MAGIC # Lab 3 — Gobernar tu propio esquema
 # MAGIC
@@ -10,8 +14,8 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("usuario", "")
-dbutils.widgets.text("companero", "")
+dbutils.widgets.text("usuario", "sebastianruiz")
+dbutils.widgets.text("companero", "cajuti08@gmail.com")
 usuario = dbutils.widgets.get("usuario").strip().lower()
 companero = dbutils.widgets.get("companero").strip().lower()
 assert usuario, "Escribe tu usuario (el sufijo de tu esquema c01_<usuario>)."
@@ -48,7 +52,7 @@ spark.sql(f"SHOW GRANTS ON TABLE {tabla}").display()
 # COMMAND ----------
 
 # La celda que usa el compañero para consultar la tabla de otro (cambia el usuario de la tabla):
-# spark.sql("SELECT TipoMercado, count(*) AS filas, round(sum(Valor)) AS kwh FROM workspace.c01_<companero>.demanda_raw WHERE CodigoVariable = 'DdaReal' GROUP BY ALL").display()
+spark.sql("SELECT TipoMercado, count(*) AS filas, round(sum(Valor)) AS kwh FROM workspace.c01_cajusquini.demanda_raw WHERE CodigoVariable = 'DdaReal' GROUP BY ALL").display()
 
 # COMMAND ----------
 
